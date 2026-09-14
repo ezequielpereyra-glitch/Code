@@ -1,0 +1,17 @@
+# Archivos intermedios - nunca se suben, siempre se regeneran
+.tmp/*
+!.tmp/.gitkeep
+
+# Secretos y credenciales
+.env
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
