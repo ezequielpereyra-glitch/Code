@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block body %}
+<h1>Partes de trabajo</h1>
+<p>Filtrar: <a href="/">todos</a>{% for s in statuses %} · <a href="/?status={{s}}">{{s}}</a>{% endfor %}</p>
+<table><tr><th>#</th><th>Cliente</th><th>Descripción</th><th>Horas</th><th>Estado</th></tr>
+{% for o in orders %}<tr><td><a href="/work-orders/{{o.id}}">{{o.id}}</a></td><td>{{o.client}}</td><td>{{o.description}}</td>
+<td>{{o.hours}}</td><td><span class="badge">{{o.status}}</span></td></tr>{% else %}<tr><td colspan="5">Sin partes.</td></tr>{% endfor %}</table>
+<fieldset><legend>Nuevo parte</legend><form method="post" action="/ui/work-orders">
+<select name="client_id" required>{% for c in clients %}<option value="{{c.id}}">{{c.name}}</option>{% endfor %}</select>
+<input name="description" placeholder="Descripción" required>
+<input name="hours" type="number" step="0.25" min="0" placeholder="Horas"><input name="hourly_rate" type="number" step="0.01" min="0" placeholder="€/hora">
+<button>Crear</button></form>{% if not clients %}<p>Primero crea un cliente.</p>{% endif %}</fieldset>
+<fieldset><legend>Nuevo cliente</legend><form method="post" action="/ui/clients">
+<input name="name" placeholder="Nombre" required><input name="email" type="email" placeholder="Email"><button>Crear</button></form></fieldset>
+<h2>Clientes</h2><ul>{% for c in clients %}<li>{{c.name}} — <a href="/portal/{{c.portal_token}}">portal</a></li>{% endfor %}</ul>
+{% endblock %}

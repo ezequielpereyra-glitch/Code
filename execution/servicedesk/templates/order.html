@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block body %}
+<h1>Parte #{{o.id}} <span class="badge">{{o.status}}</span></h1>
+{% if error %}<p class="err">{{error}}</p>{% endif %}
+<p><b>Cliente:</b> {{o.client}} · <b>Horas:</b> {{o.hours}} × {{o.hourly_rate}} € = {{'%.2f'|format(o.hours*o.hourly_rate)}} €</p>
+<p>{{o.description}}</p>
+{% if next_states %}<fieldset><legend>Cambiar estado</legend>
+{% for s in next_states %}<form class="inline" method="post" action="/ui/work-orders/{{o.id}}/status"><input type="hidden" name="status" value="{{s}}"><button>→ {{s}}</button></form>{% endfor %}</fieldset>{% endif %}
+<fieldset><legend>Firma del cliente</legend>
+{% if o.signature %}<img src="{{o.signature}}" alt="Firma" height="120">{% endif %}
+{% if o.status in ('abierto','en_curso') %}
+<form method="post" action="/ui/work-orders/{{o.id}}/signature" onsubmit="sig.value=cv.toDataURL()">
+<canvas id="cv" width="400" height="150"></canvas><br><input type="hidden" name="signature" id="sig">
+<button type="button" onclick="cv.getContext('2d').clearRect(0,0,400,150)">Borrar</button><button>Guardar firma</button></form>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');ctx.lineWidth=2;let d=false;
+const p=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+cv.onpointerdown=e=>{d=true;ctx.beginPath();ctx.moveTo(...p(e))};
+cv.onpointermove=e=>{if(d){ctx.lineTo(...p(e));ctx.stroke()}};
+cv.onpointerup=cv.onpointerleave=()=>d=false;
+</script>{% endif %}</fieldset>
+{% if o.status=='terminado' %}<form method="post" action="/ui/work-orders/{{o.id}}/invoice"><button>Generar factura</button></form>{% endif %}
+{% if o.invoice_id %}<p><a href="/invoices/{{o.invoice_id}}/print">Ver factura</a></p>{% endif %}
+<p><a href="/portal/{{o.portal_token}}">Portal del cliente</a></p>
+{% endblock %}

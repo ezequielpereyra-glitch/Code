@@ -146,3 +146,73 @@ def portal(token: str):
         orders = conn.execute("SELECT id,description,hours,status,invoice_id FROM work_orders WHERE client_id=?",
                               (client["id"],)).fetchall()
     return {"client": client["name"], "work_orders": [dict(o) for o in orders]}
+
+
+# ---------- Interfaz web (formularios HTML, sin JS salvo la firma) ----------
+from fastapi import Form, Request
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
+
+
+def _render(request, name, **ctx):
+    return templates.TemplateResponse(request, name, {"statuses": STATUSES, **ctx})
+
+
+@app.get("/", response_class=HTMLResponse)
+def ui_home(request: Request, status: str | None = None):
+    with closing(db()) as conn:
+        q = "SELECT w.*, c.name AS client FROM work_orders w JOIN clients c ON c.id=w.client_id"
+        args = ()
+        if status in STATUSES:
+            q, args = q + " WHERE w.status=?", (status,)
+        orders = conn.execute(q + " ORDER BY w.id DESC").fetchall()
+        clients = conn.execute("SELECT * FROM clients ORDER BY name").fetchall()
+    return _render(request, "home.html", orders=orders, clients=clients, filter=status)
+
+
+@app.post("/ui/clients")
+def ui_create_client(name: str = Form(...), email: str = Form("")):
+    create_client(ClientIn(name=name, email=email or None))
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/ui/work-orders")
+def ui_create_order(client_id: int = Form(...), description: str = Form(...),
+                    hours: float = Form(0), hourly_rate: float = Form(0)):
+    w = create_work_order(WorkOrderIn(client_id=client_id, description=description, hours=hours, hourly_rate=hourly_rate))
+    return RedirectResponse(f"/work-orders/{w['id']}", status_code=303)
+
+
+@app.get("/work-orders/{oid}", response_class=HTMLResponse)
+def ui_order(request: Request, oid: int, error: str | None = None):
+    with closing(db()) as conn:
+        row = conn.execute("SELECT w.*, c.name AS client, c.portal_token FROM work_orders w "
+                           "JOIN clients c ON c.id=w.client_id WHERE w.id=?", (oid,)).fetchone()
+    if not row:
+        raise HTTPException(404, "Parte no existe")
+    return _render(request, "order.html", o=row, next_states=sorted(TRANSITIONS[row["status"]]), error=error)
+
+
+def _ui_action(oid, fn):
+    try:
+        fn()
+    except HTTPException as e:
+        return RedirectResponse(f"/work-orders/{oid}?error={e.detail}", status_code=303)
+    return RedirectResponse(f"/work-orders/{oid}", status_code=303)
+
+
+@app.post("/ui/work-orders/{oid}/status")
+def ui_status(oid: int, status: str = Form(...)):
+    return _ui_action(oid, lambda: set_status(oid, StatusIn(status=status)))
+
+
+@app.post("/ui/work-orders/{oid}/signature")
+def ui_sign(oid: int, signature: str = Form(...)):
+    return _ui_action(oid, lambda: sign(oid, SignatureIn(signature=signature)))
+
+
+@app.post("/ui/work-orders/{oid}/invoice")
+def ui_invoice(oid: int):
+    return _ui_action(oid, lambda: invoice(oid))

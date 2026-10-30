@@ -18,4 +18,5 @@ abierto → en_curso → (firma obligatoria) terminado → facturado (genera fac
 ## Casos extremos / pendiente
 - Sin autenticación de operadores todavía (el portal usa token no adivinable por cliente).
 - La numeración de facturas usa COUNT(*): no admite borrados; migrar a contador dedicado.
-- Pendiente: PDF real, albaranes, auth, UI, adjuntos.
+- Interfaz web en `/` (Jinja2 + formularios; firma con canvas). Rutas `/ui/*` solo redirigen a la API y devuelven errores por query `?error=`.
+- Pendiente: PDF real, albaranes, auth, adjuntos.

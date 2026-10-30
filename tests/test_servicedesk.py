@@ -27,3 +27,19 @@ def test_full_flow(api):
     p = api.get(f"/portal/{c['portal_token']}").json()
     assert p["work_orders"][0]["status"] == "facturado"
     assert api.get("/portal/nope").status_code == 404
+
+
+def test_web_ui(api):
+    assert api.post("/ui/clients", data={"name": "Beta"}, follow_redirects=False).status_code == 303
+    r = api.post("/ui/work-orders", data={"client_id": 1, "description": "Cambio pantalla", "hours": 1, "hourly_rate": 40},
+                 follow_redirects=False)
+    assert r.headers["location"] == "/work-orders/1"
+    assert "Cambio pantalla" in api.get("/").text
+    r = api.post("/ui/work-orders/1/status", data={"status": "terminado"})
+    assert "Transición no permitida" in r.text
+    api.post("/ui/work-orders/1/status", data={"status": "en_curso"})
+    api.post("/ui/work-orders/1/signature", data={"signature": "data:image/png;base64,AAAA"})
+    api.post("/ui/work-orders/1/status", data={"status": "terminado"})
+    assert "Generar factura" in api.get("/work-orders/1").text
+    assert "Ver factura" in api.post("/ui/work-orders/1/invoice").text
+    assert api.get("/work-orders/99").status_code == 404

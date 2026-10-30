@@ -2,3 +2,5 @@ fastapi
 uvicorn
 httpx
 pytest
+jinja2
+python-multipart
