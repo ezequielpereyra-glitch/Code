@@ -19,6 +19,7 @@
 
 ### Registro de aprendizajes
 
+- **2026-10-30 — Instalación Windows:** el usuario no tiene Python ni Git; se entregan `instalar.bat`/`iniciar.bat` (CRLF) que instalan en `%USERPROFILE%\ServiceDesk` desde la rama `claude/blissful-babbage-n9nevc`. **Por qué importa:** si la rama se fusiona a `main`, actualizar `RAMA` en `instalar.bat`; los .bat no se pueden probar aquí, pedir al usuario el texto exacto de cualquier error.
 - **2026-10-30 — Proyecto ServiceDesk:** el usuario quiere un ERP de servicio técnico propio, desde cero (no copiar KubySoft, producto ajeno; kubysoft.com está bloqueado por la red del entorno). Ver `directives/servicedesk.md`. **Por qué importa:** no derivar código/diseño de terceros; el stack elegido es Python/FastAPI/SQLite por coherencia con `execution/`.
 
 <!-- Agrega nuevas entradas arriba de esta línea. -->

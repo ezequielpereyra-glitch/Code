@@ -20,3 +20,7 @@ abierto → en_curso → (firma obligatoria) terminado → facturado (genera fac
 - La numeración de facturas usa COUNT(*): no admite borrados; migrar a contador dedicado.
 - Interfaz web en `/` (Jinja2 + formularios; firma con canvas). Rutas `/ui/*` solo redirigen a la API y devuelven errores por query `?error=`.
 - Pendiente: PDF real, albaranes, auth, adjuntos.
+
+## Instalación local en Windows
+- `instalar.bat`: comprueba Python y Git, clona/actualiza el repo en `%USERPROFILE%\ServiceDesk`, instala `requirements.txt`, copia `iniciar.bat` al Escritorio y arranca.
+- `iniciar.bat`: arranca uvicorn en `0.0.0.0:8000` (accesible desde la red local) y abre el navegador. No probado en Windows real desde este entorno (Linux); verificar con el usuario.
