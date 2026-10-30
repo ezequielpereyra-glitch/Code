@@ -19,6 +19,8 @@
 
 ### Registro de aprendizajes
 
+- **2026-10-30 — Proyecto ServiceDesk:** el usuario quiere un ERP de servicio técnico propio, desde cero (no copiar KubySoft, producto ajeno; kubysoft.com está bloqueado por la red del entorno). Ver `directives/servicedesk.md`. **Por qué importa:** no derivar código/diseño de terceros; el stack elegido es Python/FastAPI/SQLite por coherencia con `execution/`.
+
 <!-- Agrega nuevas entradas arriba de esta línea. -->
 
 ---
